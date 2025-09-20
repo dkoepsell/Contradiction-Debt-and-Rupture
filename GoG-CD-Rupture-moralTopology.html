@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>GoG × CD — Moral Topology with CSV Cases</title>
+<title>GoG × Contradiction Debt — Moral Topology (Preloaded + Trajectories)</title>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <style>
   :root { --bg:#0e1116; --panel:#161a22; --muted:#aab2c0; --accent:#2dd4bf; --warn:#f59e0b; --danger:#ef4444;}
   body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; color:#e6e8ee; background:var(--bg);}
   #header { padding:14px 18px; background:#0b0e13; border-bottom:1px solid #1d2430;}
-  #wrap { display:grid; grid-template-columns: 360px 1fr; gap:0; min-height: calc(100vh - 58px);}
+  #wrap { display:grid; grid-template-columns: 430px 1fr; gap:0; min-height: calc(100vh - 58px);}
   #left { background:var(--panel); border-right:1px solid #1d2430; padding:12px 14px; overflow:auto;}
   #right { display:flex; flex-direction:column;}
-  #plot { flex:1 1 auto; height: calc(100vh - 260px);}
+  #plot { flex:1 1 auto; height: calc(100vh - 320px);}
   h1 { font-size:18px; margin:0 0 6px 0; color:#e6e8ee;}
   .sub { color:var(--muted); font-size:13px; line-height:1.3; margin-bottom:10px;}
   .section { margin:12px 0 14px 0; padding:10px; background:#111522; border:1px solid #20283a; border-radius:8px;}
@@ -24,15 +24,12 @@
   button.primary { background: var(--accent); color:#0e1116; border:none; font-weight:600;}
   .row { display:flex; gap:8px; }
   .row > * { flex:1; }
-  .badge { display:inline-block; padding:3px 6px; border-radius:999px; font-size:12px; border:1px solid #2a3346; background:#0f1320; color:#c8d0df; }
-  #insight { padding:12px 16px; min-height:120px; background:#0f1320; border-top:1px solid #1d2430;}
   .legend { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;}
   .chip { display:flex; align-items:center; gap:6px; background:#101622; border:1px solid #22304b; padding:4px 8px; border-radius:999px; font-size:12px; color:#d8dee9;}
   .dot { width:10px; height:10px; border-radius:50%;}
   .dot.plural { background:#22c55e;}
   .dot.auth { background:#f59e0b;}
   .dot.coll { background:#ef4444;}
-  .dot.case { background:#a78bfa;}
   .dot.band1 { background:#16a34a;}
   .dot.band2 { background:#84cc16;}
   .dot.band3 { background:#f59e0b;}
@@ -40,16 +37,19 @@
   .note { color:#aab2c0; font-size:12px; margin-top:6px; }
   .small { font-size:12px; color:#cdd3df; }
   .hr { border-top:1px dashed #2a3346; margin:10px 0; }
-  #caseList { max-height:220px; overflow:auto; padding:6px; background:#0f1320; border:1px solid #22304b; border-radius:8px;}
+  #caseList { max-height:240px; overflow:auto; padding:6px; background:#0f1320; border:1px solid #22304b; border-radius:8px;}
   .case-item { display:flex; align-items:center; gap:6px; padding:3px 0; font-size:12px;}
   .controls-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  details summary { cursor: pointer; color:#dbe3f1; }
+  #insight { padding:12px 16px; min-height:150px; background:#0f1320; border-top:1px solid #1d2430;}
+  .mode { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
 </style>
 </head>
 <body>
   <div id="header">
-    <h1>Geometry of the Good × Contradiction Debt — Moral Topology</h1>
+    <h1>Geometry of the Good × Contradiction Debt — Moral Topology (Preloaded + Trajectories)</h1>
     <div class="sub">
-      3D moral field with terrain, regime trajectories, and all cases from your CSV. Axes: X=Trust density (capacity factor), Y=Effective repair (R), Z=Rupture probability (=1−R/V).
+      Default: stylized moral terrain (theory). Optional: data-aligned surface + contours + residuals. Toggle static vs. compare trajectories. Axes: X=capacity_factor (trust), Y=effective repair R (fulfillment proxy), Z=rupture_probability = 1 − R/V (debt proxy).
     </div>
   </div>
 
@@ -58,20 +58,25 @@
       <div class="section">
         <h3>Concept-to-data mapping</h3>
         <div class="small">
-          This app maps CD variables into GoG coordinates:
+          - <b>X (Trust density):</b> capacity_factor = mean(L, E, K).<br>
+          - <b>Y (Fulfillment proxy):</b> effective repair R = repair_avg × capacity_factor.<br>
+          - <b>Z (Debt proxy):</b> rupture_probability = 1 − R/V (monotonic with contradiction debt).<br>
           <div class="hr"></div>
-          <ul>
-            <li><b>X (Trust density):</b> capacity_factor = mean of legitimacy, elite cohesion, institutional capacity.</li>
-            <li><b>Y (Fulfillment proxy):</b> R = effective repair (repair_avg × capacity_factor). In this CSV, only R is provided; we use it as the best available proxy.</li>
-            <li><b>Z (Debt proxy):</b> rupture_probability = 1 − R/V, monotonic with contradiction debt.</li>
-          </ul>
-          <div class="note">Interpretation: Lower Z and higher X,Y indicate stable basins; higher Z indicates rupture valleys.</div>
+          <b>Interpretation:</b> Higher X,Y with lower Z indicates a stable basin; lower X/Y with higher Z indicates rupture valleys.
         </div>
       </div>
 
       <div class="section">
-        <h3>Layers</h3>
-        <label><input type="checkbox" id="toggleSurface" checked> Moral terrain surface (illustrative)</label>
+        <h3>Mode & layers</h3>
+        <div class="mode">
+          <label><input type="radio" name="mode" id="modeStatic" checked> Static field</label>
+          <label><input type="radio" name="mode" id="modeTraj"> Compare trajectories</label>
+        </div>
+        <div class="hr"></div>
+        <label><input type="checkbox" id="toggleStylized" checked> Stylized GoG surface (theory)</label>
+        <label><input type="checkbox" id="toggleFitted"> Data-aligned fitted surface (with contours)</label>
+        <label><input type="checkbox" id="toggleContours" checked> Label contours on fitted surface</label>
+        <label><input type="checkbox" id="toggleResiduals"> Residual overlay (data − theory)</label>
         <label><input type="checkbox" id="togglePluralist" checked> Pluralist/Utopian trajectory</label>
         <label><input type="checkbox" id="toggleAuthoritarian" checked> Authoritarian trajectory</label>
         <label><input type="checkbox" id="toggleCollapsed" checked> Collapsed/Anomic trajectory</label>
@@ -80,12 +85,21 @@
           <span class="chip"><span class="dot plural"></span>Pluralist</span>
           <span class="chip"><span class="dot auth"></span>Authoritarian</span>
           <span class="chip"><span class="dot coll"></span>Collapsed</span>
-          <span class="chip"><span class="dot case"></span>CSV cases</span>
         </div>
       </div>
 
       <div class="section">
-        <h3>Case filters and toggles</h3>
+        <h3>Metric transforms & smoothing</h3>
+        <label><input type="checkbox" id="normalizeXY"> Normalize X,Y to [0,1] (data)</label>
+        <label><input type="checkbox" id="logitZ"> Logit transform Z (both theory & data)</label>
+        <label>Smoother sigma (fitted surface)
+          <input type="range" id="sigma" min="0.08" max="0.40" step="0.01" value="0.20">
+        </label>
+        <div class="note">If residuals shrink under transforms, divergence is likely measurement-driven; if they persist, that invites theory refinement.</div>
+      </div>
+
+      <div class="section">
+        <h3>Case filters & toggles</h3>
         <div class="controls-row">
           <label><input type="checkbox" id="band4" checked> <span class="dot band4"></span> R/V < 0.30 (1–2 q)</label>
           <label><input type="checkbox" id="band3" checked> <span class="dot band3"></span> 0.30–0.45 (2–3 q)</label>
@@ -99,11 +113,11 @@
           <label><input type="checkbox" id="showLabels"> Show labels</label>
         </div>
         <div id="caseList"></div>
-        <div class="note">Tick/untick countries to show/hide. Filters apply to the list and the plot.</div>
+        <div class="note">Toggle any country-year; filters apply to the list and the plot.</div>
       </div>
 
       <div class="section">
-        <h3>How to add/edit a case</h3>
+        <h3>Add a custom case</h3>
         <div class="small">
           Enter CD inputs; we compute \(R_\text{eff} = \text{repair\_avg}\cdot \text{capacity\_factor}\), \(R/V\), and map to (X,Y,Z).
           <div class="hr"></div>
@@ -122,29 +136,19 @@
             <button class="primary" id="addCase">Add/Update case</button>
             <button id="clearCases">Clear custom</button>
           </div>
-          <div class="note">Defaults: X = capacity_factor, Y = R (effective repair) or repair_avg×capacity_factor for custom, Z = 1 − R/V.</div>
-        </div>
-      </div>
-
-      <div class="section">
-        <h3>Reading the bands</h3>
-        <div class="legend">
-          <span class="chip"><span class="dot band4"></span> R/V < 0.30 → rupture 1–2 q</span>
-          <span class="chip"><span class="dot band3"></span> 0.30–0.45 → 2–3 q</span>
-          <span class="chip"><span class="dot band2"></span> 0.45–0.60 → 3–6 q</span>
-          <span class="chip"><span class="dot band1"></span> ≥0.60 → ≥8 q</span>
+          <div class="note">Defaults: X=capacity_factor, Y=R (effective repair), Z=1 − R/V.</div>
         </div>
       </div>
     </div>
 
     <div id="right">
       <div id="plot"></div>
-      <div id="insight">Click any point for its CD decomposition and GoG interpretation.</div>
+      <div id="insight">Click any point for CD decomposition and GoG interpretation.</div>
     </div>
   </div>
 
 <script>
-/* ========== 1) CSV (embedded) ========== */
+/* ===================== Embedded CSV (preloaded from your attachment) ===================== */
 const CSV_DATA = `Country,Year,Total,V_total,R,R_V_ratio,capacity_factor,band,rupture_probability,rupture_occurred
 Somalia,2023,111.9,9.325,0.6750000000000007,0.0723860589812333,0.0675000000000001,1-2 quarters,0.9638069705093834,0
 Yemen,2023,108.9,9.075,0.9250000000000008,0.1019283746556474,0.0925,1-2 quarters,0.9490358126721764,0
@@ -247,153 +251,183 @@ Indonesia,2023,65.60000000000001,5.466666666666668,4.533333333333332,0.829268292
 Gabon,2023,65.50000000000001,5.458333333333335,4.541666666666665,0.8320610687022896,0.4541666666666665,4-6 quarters,0.5839694656488552,0
 Saudi Arabia,2023,65.3,5.441666666666666,4.558333333333334,0.8376722817764166,0.4558333333333333,4-6 quarters,0.5811638591117917,0`;
 
+/* ===================== Helpers and state ===================== */
+const eps = 1e-6;
+function clamp01(v){ return Math.max(0+eps, Math.min(1-eps, v)); }
+function logit(p){ p = clamp01(p); return Math.log(p/(1-p)); }
+function norm01(v,min,max){ if (max-min<eps) return 0.5; return (v-min)/(max-min); }
+
+let csvCases = [];         // parsed records
+let caseVisibility = {};   // key -> boolean
+let customCases = [];      // {name, X,Y,Z, ...}
+
+const caseListDiv = document.getElementById('caseList');
+const searchInput = document.getElementById('search');
+const selectAllBtn = document.getElementById('selectAll');
+const selectNoneBtn = document.getElementById('selectNone');
+const insight = document.getElementById('insight');
+
+/* ===================== Parse CSV ===================== */
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const header = lines.shift().split(',');
-  return lines.map(line => {
+  const idx = {}; header.forEach((h,i)=> idx[h.trim()] = i);
+  const out = [];
+  for (const line of lines) {
+    if (!line.trim()) continue;
     const cols = line.split(',');
-    const obj = {};
-    header.forEach((h,i) => obj[h.trim()] = cols[i] !== undefined ? cols[i].trim() : '');
-    // Cast numerics
-    ['Year','Total','V_total','R','R_V_ratio','capacity_factor','rupture_probability','rupture_occurred']
-      .forEach(k => obj[k] = obj[k] === '' ? null : +obj[k]);
-    return obj;
-  });
+    const o = (k)=> cols[idx[k]] !== undefined ? cols[idx[k]].trim() : '';
+    const obj = {
+      Country: o('Country'),
+      Year: +o('Year'),
+      V_total: +o('V_total'),
+      R: +o('R'),
+      capacity_factor: +o('capacity_factor'),
+      R_V_ratio: +o('R_V_ratio'),
+      rupture_probability: +o('rupture_probability'),
+      rupture_occurred: +o('rupture_occurred')
+    };
+    if (isFinite(obj.capacity_factor) && isFinite(obj.R) && isFinite(obj.rupture_probability)) out.push(obj);
+  }
+  return out;
 }
-let csvCases = parseCSV(CSV_DATA);
+csvCases = parseCSV(CSV_DATA);
 
-/* ========== 2) Utilities ========== */
-function bandFromRV(rv) {
-  if (rv < 0.30) return '1-2 quarters';
-  if (rv < 0.45) return '2-4 quarters';
-  if (rv < 0.60) return '4-6 quarters';
-  return '8+ quarters';
-}
-function bandColorByRV(rv) {
-  if (rv < 0.30) return '#ef4444';
-  if (rv < 0.45) return '#f59e0b';
-  if (rv < 0.60) return '#84cc16';
-  return '#16a34a';
-}
-function bandAllowed(bandLabel) {
+/* ===================== Bands & colors ===================== */
+function bandFromRV(rv){ if (rv < 0.30) return '1-2 quarters'; if (rv < 0.45) return '2-4 quarters'; if (rv < 0.60) return '4-6 quarters'; return '8+ quarters'; }
+function bandAllowed(label){
   const m = {
     '1-2 quarters': document.getElementById('band4').checked,
     '2-4 quarters': document.getElementById('band3').checked,
     '4-6 quarters': document.getElementById('band2').checked,
     '8+ quarters': document.getElementById('band1').checked
   };
-  return !!m[bandLabel];
+  return !!m[label];
 }
+function bandColor(rv){ if (rv<0.30) return '#ef4444'; if (rv<0.45) return '#f59e0b'; if (rv<0.60) return '#84cc16'; return '#16a34a'; }
+function caseKey(c){ return `${c.Country} (${c.Year})`; }
 
-/* ========== 3) Moral terrain & trajectories ========== */
-function buildSurface() {
-  const xVals = Array.from({length: 32}, (_, i) => i/31);
-  const yVals = Array.from({length: 32}, (_, i) => i/31);
-  const zGrid = [];
-  for (let i = 0; i < yVals.length; i++) {
-    const row = [];
-    for (let j = 0; j < xVals.length; j++) {
-      const peak = Math.exp(-((xVals[j]-0.9)**2 + (yVals[i]-1.0)**2)*14) * 0.28;
-      const valley = -Math.exp(-((xVals[j]-0.3)**2 + (yVals[i]-0.1)**2)*16) * 0.32;
-      const baseline = 0.35;
-      row.push(baseline - peak + valley);
+/* ===================== Surfaces ===================== */
+function buildStylizedSurface(useLogit=false){
+  const xs = Array.from({length: 40}, (_, i) => i/39);
+  const ys = Array.from({length: 40}, (_, i) => i/39);
+  const z = [];
+  for (let yi=0; yi<ys.length; yi++){
+    const row=[];
+    for (let xi=0; xi<xs.length; xi++){
+      const x=xs[xi], y=ys[yi];
+      const peak = Math.exp(-((x-0.9)**2 + (y-0.95)**2)*14) * 0.28;
+      const valley= -Math.exp(-((x-0.30)**2 + (y-0.10)**2)*16) * 0.32;
+      let zval = Math.max(0, Math.min(1, 0.35 - peak + valley));
+      row.push(useLogit ? logit(zval) : zval);
     }
-    zGrid.push(row);
+    z.push(row);
   }
-  return {
-    type: 'surface',
-    x: xVals, y: yVals, z: zGrid,
-    colorscale: 'YlGnBu',
-    opacity: 0.38,
-    showscale: false,
-    name: 'Moral terrain'
-  };
+  return {xs, ys, z};
 }
 
-const pluralist = {
-  x: [0.15,0.30,0.50,0.72,0.90],
-  y: [0.25,0.45,0.62,0.80,0.95],
-  z: [0.55,0.40,0.28,0.20,0.15],
-  mode: 'lines+markers', type: 'scatter3d', name: 'Pluralist/Utopian',
-  line: { color: '#22c55e', width: 4 }, marker: { color: '#22c55e', size: 4 },
-  text: ['Start','Reciprocity','Repair event','Consolidation','Stable peak'],
-  hoverinfo: 'text'
-};
-const authoritarian = {
-  x: [0.25,0.32,0.40,0.46,0.52],
-  y: [0.30,0.34,0.38,0.40,0.42],
-  z: [0.40,0.42,0.44,0.47,0.50],
-  mode: 'lines+markers', type: 'scatter3d', name: 'Authoritarian',
-  line: { color: '#f59e0b', width: 4 }, marker: { color: '#f59e0b', size: 4 },
-  text: ['Start','Enforcement spike','Stagnation','Contradictions','Brittle plateau'],
-  hoverinfo: 'text'
-};
-const collapsed = {
-  x: [0.30,0.26,0.22,0.18,0.14],
-  y: [0.28,0.24,0.20,0.16,0.12],
-  z: [0.50,0.58,0.65,0.73,0.80],
-  mode: 'lines+markers', type: 'scatter3d', name: 'Collapsed/Anomic',
-  line: { color: '#ef4444', width: 4 }, marker: { color: '#ef4444', size: 4 },
-  text: ['Start','Obligation denial','Trust shock','Cascade','Rupture valley'],
-  hoverinfo: 'text'
-};
+function buildFittedSurface(points, sigma=0.2, gridN=40, useNormalize=false, useLogit=false){
+  if (!points.length) return null;
+  const xMin = Math.min(...points.map(p=>p.x)), xMax = Math.max(...points.map(p=>p.x));
+  const yMin = Math.min(...points.map(p=>p.y)), yMax = Math.max(...points.map(p=>p.y));
+  const P = points.map(p => {
+    const X = useNormalize ? norm01(p.x, xMin, xMax) : p.x;
+    const Y = useNormalize ? norm01(p.y, yMin, yMax) : p.y;
+    let Z = p.z; Z = useLogit ? logit(clamp01(Z)) : Z;
+    return {X,Y,Z};
+  });
+  const xs = Array.from({length: gridN}, (_, i)=> i/(gridN-1));
+  const ys = Array.from({length: gridN}, (_, i)=> i/(gridN-1));
+  const z = [];
+  for (let yi=0; yi<ys.length; yi++){
+    const row=[];
+    for (let xi=0; xi<xs.length; xi++){
+      const xg=xs[xi], yg=ys[yi];
+      let num=0, den=0;
+      for (const p of P){
+        const r2 = ((xg-p.X)**2 + (yg-p.Y)**2)/(sigma*sigma);
+        const k = Math.exp(-r2);
+        num += k*p.Z; den += k;
+      }
+      row.push(den>1e-9 ? num/den : 0.5);
+    }
+    z.push(row);
+  }
+  return {xs, ys, z};
+}
 
-/* ========== 4) Build case list UI ========== */
-const caseListDiv = document.getElementById('caseList');
-const searchInput = document.getElementById('search');
-const selectAllBtn = document.getElementById('selectAll');
-const selectNoneBtn = document.getElementById('selectNone');
-let caseVisibility = {}; // key: "Country (Year)" -> boolean
+function buildResidualSurface(theory, fitted){
+  if (!theory || !fitted) return null;
+  const nY = Math.min(theory.z.length, fitted.z.length);
+  const nX = Math.min(theory.z[0].length, fitted.z[0].length);
+  const z = [];
+  for (let yi=0; yi<nY; yi++){
+    const row=[];
+    for (let xi=0; xi<nX; xi++){
+      row.push(fitted.z[yi][xi] - theory.z[yi][xi]);
+    }
+    z.push(row);
+  }
+  return {xs:fitted.xs, ys:fitted.ys, z};
+}
 
-function caseKey(c) { return `${c.Country} (${c.Year})`; }
+/* ===================== Trajectories ===================== */
+const pluralistTr = { x:[0.15,0.30,0.50,0.72,0.90], y:[0.25,0.45,0.62,0.80,0.95], z:[0.55,0.40,0.28,0.20,0.15],
+  mode:'lines+markers', type:'scatter3d', name:'Pluralist/Utopian',
+  line:{color:'#22c55e',width:4}, marker:{color:'#22c55e',size:4},
+  text:['Start','Reciprocity','Repair event','Consolidation','Stable peak'], hoverinfo:'text' };
+const authoritarianTr = { x:[0.25,0.32,0.40,0.46,0.52], y:[0.30,0.34,0.38,0.40,0.42], z:[0.40,0.42,0.44,0.47,0.50],
+  mode:'lines+markers', type:'scatter3d', name:'Authoritarian',
+  line:{color:'#f59e0b',width:4}, marker:{color:'#f59e0b',size:4},
+  text:['Start','Enforcement spike','Stagnation','Contradictions','Brittle plateau'], hoverinfo:'text' };
+const collapsedTr = { x:[0.30,0.26,0.22,0.18,0.14], y:[0.28,0.24,0.20,0.16,0.12], z:[0.50,0.58,0.65,0.73,0.80],
+  mode:'lines+markers', type:'scatter3d', name:'Collapsed/Anomic',
+  line:{color:'#ef4444',width:4}, marker:{color:'#ef4444',size:4},
+  text:['Start','Obligation denial','Trust shock','Cascade','Rupture valley'], hoverinfo:'text' };
 
-function filteredCases() {
-  const q = (searchInput.value || '').toLowerCase();
+/* ===================== Case list UI ===================== */
+function filteredCases(){
+  const q = (document.getElementById('search').value || '').toLowerCase();
   return csvCases.filter(c => {
     const label = caseKey(c).toLowerCase();
     if (!label.includes(q)) return false;
-    // band filter by R_V_ratio
     const band = bandFromRV(c.R_V_ratio);
     return bandAllowed(band);
   });
 }
-
-function buildCaseList() {
-  caseListDiv.innerHTML = '';
-  const items = filteredCases();
-  items.forEach(c => {
+function buildCaseList(){
+  caseListDiv.innerHTML='';
+  filteredCases().forEach(c=>{
     const key = caseKey(c);
     if (!(key in caseVisibility)) caseVisibility[key] = true;
-    const row = document.createElement('div');
-    row.className = 'case-item';
-    const cb = document.createElement('input');
-    cb.type='checkbox'; cb.checked = !!caseVisibility[key];
-    cb.addEventListener('change', () => { caseVisibility[key] = cb.checked; render(); });
-    const colorDot = document.createElement('span');
-    colorDot.className='dot';
-    colorDot.style.background = bandColorByRV(c.R_V_ratio);
-    const label = document.createElement('span');
-    label.textContent = `${c.Country} (${c.Year})`;
-    row.appendChild(cb); row.appendChild(colorDot); row.appendChild(label);
+    const row = document.createElement('div'); row.className='case-item';
+    const cb = document.createElement('input'); cb.type='checkbox'; cb.checked = !!caseVisibility[key];
+    cb.addEventListener('change', ()=>{ caseVisibility[key]=cb.checked; render(); });
+    const dot = document.createElement('span'); dot.className='dot'; dot.style.background = bandColor(c.R_V_ratio);
+    const label = document.createElement('span'); label.textContent = key;
+    row.appendChild(cb); row.appendChild(dot); row.appendChild(label);
     caseListDiv.appendChild(row);
   });
 }
+document.getElementById('search').addEventListener('input', buildCaseList);
+document.getElementById('selectAll').addEventListener('click', ()=>{ filteredCases().forEach(c=> caseVisibility[caseKey(c)]=true); buildCaseList(); render(); });
+document.getElementById('selectNone').addEventListener('click', ()=>{ filteredCases().forEach(c=> caseVisibility[caseKey(c)]=false); buildCaseList(); render(); });
 
-searchInput.addEventListener('input', buildCaseList);
-selectAllBtn.addEventListener('click', () => {
-  filteredCases().forEach(c => caseVisibility[caseKey(c)] = true);
-  buildCaseList(); render();
-});
-selectNoneBtn.addEventListener('click', () => {
-  filteredCases().forEach(c => caseVisibility[caseKey(c)] = false);
-  buildCaseList(); render();
-});
-
-/* ========== 5) Build case traces (by band) ========== */
-function buildCasesByBand() {
+/* ===================== Build traces (static vs. trajectories) ===================== */
+function buildCaseTracesStatic(){
   const showLabels = document.getElementById('showLabels').checked;
-  const base = { type:'scatter3d', mode: showLabels ? 'markers+text' : 'markers', textposition:'top center', marker:{ size:5, symbol:'diamond' } };
+  const useNorm = document.getElementById('normalizeXY').checked;
+  const useLog = document.getElementById('logitZ').checked;
 
+  let xMin, xMax, yMin, yMax;
+  if (useNorm && csvCases.length>0){
+    xMin = Math.min(...csvCases.map(c=>c.capacity_factor));
+    xMax = Math.max(...csvCases.map(c=>c.capacity_factor));
+    yMin = Math.min(...csvCases.map(c=>c.R));
+    yMax = Math.max(...csvCases.map(c=>c.R));
+  }
+
+  const base = { type:'scatter3d', mode: showLabels? 'markers+text':'markers', textposition:'top center', marker:{ size:5, symbol:'diamond' } };
   const bands = {
     '1-2 quarters': { name:'Cases: 1–2 q', color:'#ef4444', xs:[], ys:[], zs:[], texts:[], hover:[] },
     '2-4 quarters': { name:'Cases: 2–3 q', color:'#f59e0b', xs:[], ys:[], zs:[], texts:[], hover:[] },
@@ -401,140 +435,209 @@ function buildCasesByBand() {
     '8+ quarters': { name:'Cases: 8+ q', color:'#16a34a', xs:[], ys:[], zs:[], texts:[], hover:[] }
   };
 
-  csvCases.forEach(c => {
+  csvCases.forEach(c=>{
     const key = caseKey(c);
     const band = bandFromRV(c.R_V_ratio);
     if (!bandAllowed(band)) return;
     if (caseVisibility[key] === false) return;
 
-    const X = c.capacity_factor;
-    const Y = c.R; // effective repair (proxy for fulfillment)
-    const Z = c.rupture_probability; // = 1 - R/V
-    const txt = showLabels ? `${c.Country} (${c.Year})` : '';
-    const hv = `${c.Country} (${c.Year})<br>R/V: ${c.R_V_ratio.toFixed(3)}<br>Prob: ${Z.toFixed(3)}<br>V_total: ${c.V_total.toFixed(3)}<br>R (eff): ${Y.toFixed(3)}<br>capacity: ${X.toFixed(3)}<br>Band: ${band}<br>Occurred: ${c.rupture_occurred}`;
+    let X = c.capacity_factor, Y = c.R, Z = c.rupture_probability;
+    if (useNorm){ X = norm01(X, xMin, xMax); Y = norm01(Y, yMin, yMax); }
+    if (useLog){ Z = logit(clamp01(Z)); }
 
+    const txt = showLabels ? key : '';
+    const hv = `${key}<br>R/V: ${c.R_V_ratio.toFixed(3)}<br>Z: ${c.rupture_probability.toFixed(3)}${useLog?' (logit)':''}<br>V_total: ${c.V_total?.toFixed(3)}<br>R (eff): ${c.R?.toFixed(3)}<br>capacity: ${c.capacity_factor?.toFixed(3)}<br>Band: ${band}<br>Occurred: ${c.rupture_occurred}`;
     const bucket = bands[band];
     bucket.xs.push(X); bucket.ys.push(Y); bucket.zs.push(Z);
     bucket.texts.push(txt); bucket.hover.push(hv);
   });
 
-  // Convert to traces
-  return Object.values(bands).map(b => ({
-    ...base,
-    name: b.name,
-    x: b.xs, y: b.ys, z: b.zs,
-    text: b.texts, hovertext: b.hover, hoverinfo:'text',
-    marker: { ...base.marker, color: b.color }
+  return Object.values(bands).map(b=>({
+    ...base, name:b.name, x:b.xs, y:b.ys, z:b.zs, text:b.texts, hovertext:b.hover, hoverinfo:'text',
+    marker:{ ...base.marker, color:b.color }
   }));
 }
 
-/* ========== 6) Custom case add/edit ========== */
-let customCases = []; // {name, X, Y, Z, rv, R_eff, V, Cap, Ravg}
-function clamp01(v){ return Math.max(0, Math.min(1, v)); }
-function clampV(v){ return Math.max(0, Math.min(2, v)); }
+function buildCaseTracesTraj(){
+  // Group by country; connect by year
+  const showLabels = document.getElementById('showLabels').checked;
+  const useNorm = document.getElementById('normalizeXY').checked;
+  const useLog = document.getElementById('logitZ').checked;
 
-document.getElementById('addCase').addEventListener('click', () => {
-  const name = (document.getElementById('caseName').value || '').trim() || `Custom ${customCases.length+1}`;
-  const V = clampV(parseFloat(document.getElementById('V').value));
-  const Ravg = clamp01(parseFloat(document.getElementById('Ravg').value));
-  const Cap = clamp01(parseFloat(document.getElementById('Cap').value));
-  const Xov = document.getElementById('Xoverride').value;
-  const R_eff = +(Ravg*Cap).toFixed(4);
-  const rv = (V > 0) ? +(R_eff / V).toFixed(4) : null;
-  const X = Xov ? clamp01(+Xov) : Cap;
-  const Y = R_eff;
-  const Z = rv != null ? +(1 - rv).toFixed(4) : null;
+  let xMin, xMax, yMin, yMax;
+  if (useNorm && csvCases.length>0){
+    xMin = Math.min(...csvCases.map(c=>c.capacity_factor));
+    xMax = Math.max(...csvCases.map(c=>c.capacity_factor));
+    yMin = Math.min(...csvCases.map(c=>c.R));
+    yMax = Math.max(...csvCases.map(c=>c.R));
+  }
 
-  const idx = customCases.findIndex(c => c.name.toLowerCase() === name.toLowerCase());
-  const entry = { name, X, Y, Z, rv, R_eff, V, Cap, Ravg };
-  if (idx >= 0) customCases[idx] = entry; else customCases.push(entry);
-  insight.innerHTML = `<b>Custom case:</b> ${name}<br><b>R_eff:</b> ${R_eff} | <b>R/V:</b> ${rv} | <b>Map:</b> X=${X}, Y=${Y}, Z=${Z}`;
-  render();
-});
+  const byCountry = {};
+  csvCases.forEach(c => {
+    const key = caseKey(c);
+    if (caseVisibility[key] === false) return; // respect toggles
+    if (!byCountry[c.Country]) byCountry[c.Country] = [];
+    byCountry[c.Country].push(c);
+  });
 
-document.getElementById('clearCases').addEventListener('click', () => {
-  customCases = [];
-  insight.innerHTML = `Custom cases cleared.`;
-  render();
-});
+  const traces = [];
+  const colors = ['#60a5fa','#34d399','#f87171','#fbbf24','#a78bfa','#22d3ee','#f472b6','#c084fc','#4ade80','#f59e0b'];
+  let ci = 0;
 
-function buildCustomTrace() {
-  if (customCases.length === 0) return null;
-  return {
-    type:'scatter3d', mode:'markers+text', name:'Custom cases',
-    x: customCases.map(c=>c.X),
-    y: customCases.map(c=>c.Y),
-    z: customCases.map(c=>c.Z),
-    text: customCases.map(c=>c.name),
-    hovertext: customCases.map(c => `${c.name}<br>R/V: ${c.rv} | R_eff: ${c.R_eff}<br>X=${c.X}, Y=${c.Y}, Z=${c.Z}`),
-    hoverinfo:'text',
-    textposition:'top center',
-    marker:{ size:7, color:'#a78bfa', symbol:'diamond-open' }
-  };
+  for (const country of Object.keys(byCountry)){
+    const arr = byCountry[country].sort((a,b)=> a.Year - b.Year);
+    const X=[],Y=[],Z=[], T=[], H=[];
+    arr.forEach(c=>{
+      let x = c.capacity_factor, y=c.R, z=c.rupture_probability;
+      if (useNorm){ x = norm01(x,xMin,xMax); y=norm01(y,yMin,yMax); }
+      if (useLog){ z = logit(clamp01(z)); }
+      X.push(x); Y.push(y); Z.push(z);
+      T.push(showLabels? `${c.Country} ${c.Year}` : '');
+      H.push(`${c.Country} (${c.Year})<br>R/V: ${c.R_V_ratio.toFixed(3)}<br>Z: ${c.rupture_probability.toFixed(3)}${useLog?' (logit)':''}<br>R: ${c.R.toFixed(3)} | cap: ${c.capacity_factor.toFixed(3)}`);
+    });
+
+    traces.push({
+      type:'scatter3d', mode: showLabels? 'lines+markers+text':'lines+markers',
+      name: country,
+      x:X, y:Y, z:Z,
+      text:T, hovertext:H, hoverinfo:'text', textposition:'top center',
+      line:{ color: colors[ci % colors.length], width:3 },
+      marker:{ color: colors[ci % colors.length], size:4 }
+    });
+    ci++;
+  }
+  return traces;
 }
 
-/* ========== 7) Plot and interactions ========== */
+/* ===================== Build surfaces & residuals ===================== */
+function toPoints(){ return csvCases.map(c => ({x:c.capacity_factor, y:c.R, z:c.rupture_probability})); }
+
+function buildSurfaceTraces(){
+  const useLog = document.getElementById('logitZ').checked;
+  const useNorm= document.getElementById('normalizeXY').checked;
+  const sigma  = +document.getElementById('sigma').value;
+
+  const traces=[];
+  const theory = buildStylizedSurface(useLog);
+  if (document.getElementById('toggleStylized').checked){
+    traces.push({ type:'surface', x:theory.xs, y:theory.ys, z:theory.z, colorscale:'YlGnBu', opacity:0.35, showscale:false, name:'Stylized terrain' });
+  }
+  if (document.getElementById('toggleFitted').checked && csvCases.length>0){
+    const fit = buildFittedSurface(toPoints(), sigma, 40, useNorm, useLog);
+    traces.push({
+      type:'surface', x:fit.xs, y:fit.ys, z:fit.z, colorscale:'Cividis', opacity:0.42, showscale:false, name:'Fitted terrain',
+      contours:{ z:{ show: document.getElementById('toggleContours').checked, usecolormap:false, highlightcolor:'#ffffff', project:{z:true} } }
+    });
+    if (document.getElementById('toggleResiduals').checked){
+      const residual = buildResidualSurface(theory, fit);
+      const planeZ = residual.z.map(row => row.map(()=> 0.0));
+      traces.push({
+        type:'surface', x:residual.xs, y:residual.ys, z:planeZ,
+        surfacecolor: residual.z, colorscale:'RdBu', reversescale:true,
+        opacity:0.55, showscale:true, colorbar:{title:'Residual (data − theory)'}, name:'Residuals'
+      });
+    }
+  }
+  return traces;
+}
+
+/* ===================== Plot & interactions ===================== */
 const layout = {
-  margin: { l:0, r:0, b:0, t:0 },
-  scene: {
-    xaxis: { title: 'Trust density (X) = capacity_factor' },
-    yaxis: { title: 'Fulfillment proxy (Y) = effective repair (R)' },
-    zaxis: { title: 'Debt proxy (Z) = rupture_probability = 1 − R/V' },
-    camera: { eye:{x:1.6, y:1.6, z:0.9} }
+  margin:{l:0,r:0,b:0,t:0},
+  scene:{
+    xaxis:{ title:'Trust density (X) = capacity_factor' },
+    yaxis:{ title:'Fulfillment proxy (Y) = effective repair (R)' },
+    zaxis:{ title:'Debt proxy (Z) = rupture_probability = 1 − R/V' },
+    camera:{ eye:{x:1.6,y:1.6,z:0.9} }
   },
-  legend: { x:0.02, y:0.98, font:{color:'#e6e8ee'} },
+  legend:{ x:0.02, y:0.98, font:{color:'#e6e8ee'} },
   paper_bgcolor:'#0e1116', plot_bgcolor:'#0e1116', font:{ color:'#e6e8ee' }
 };
 
-function render() {
+function render(){
   const traces = [];
-  if (document.getElementById('toggleSurface').checked) traces.push(buildSurface());
-  if (document.getElementById('togglePluralist').checked) traces.push(pluralist);
-  if (document.getElementById('toggleAuthoritarian').checked) traces.push(authoritarian);
-  if (document.getElementById('toggleCollapsed').checked) traces.push(collapsed);
-
-  if (document.getElementById('toggleCases').checked) {
-    buildCasesByBand().forEach(tr => traces.push(tr));
-  }
-  const customTr = buildCustomTrace();
-  if (customTr) traces.push(customTr);
+  // surfaces
+  buildSurfaceTraces().forEach(t=> traces.push(t));
+  // regime trajectories
+  if (document.getElementById('togglePluralist').checked) traces.push(pluralistTr);
+  if (document.getElementById('toggleAuthoritarian').checked) traces.push(authoritarianTr);
+  if (document.getElementById('toggleCollapsed').checked) traces.push(collapsedTr);
+  // cases (static vs trajectories)
+  const traj = document.getElementById('modeTraj').checked;
+  const caseTrs = traj ? buildCaseTracesTraj() : buildCaseTracesStatic();
+  caseTrs.forEach(t=> traces.push(t));
+  // custom cases
+  const customTr = buildCustomTrace(); if (customTr) traces.push(customTr);
 
   Plotly.newPlot('plot', traces, layout);
 }
 
-['toggleSurface','togglePluralist','toggleAuthoritarian','toggleCollapsed','toggleCases','band1','band2','band3','band4','showLabels']
-  .forEach(id => document.getElementById(id).addEventListener('change', () => { buildCaseList(); render(); }));
-
-const insight = document.getElementById('insight');
 document.getElementById('plot').on('plotly_click', function(evt){
   const pt = evt.points?.[0]; if (!pt) return;
   const series = pt.data.name || '';
-  const x = pt.x, y = pt.y, z = pt.z;
-  let msg = `<b>Series:</b> ${series}<br><b>X (trust):</b> ${(+x).toFixed(3)} <b>Y (repair eff.):</b> ${(+y).toFixed(3)} <b>Z (prob):</b> ${(+z).toFixed(3)}<br>`;
-
-  if (series.startsWith('Cases:')) {
-    // find closest case by coordinates (safe here given exact mapping)
-    const found = csvCases.find(c => Math.abs(c.capacity_factor - x) < 1e-9 && Math.abs(c.R - y) < 1e-9 && Math.abs(c.rupture_probability - z) < 1e-9);
-    if (found) {
-      const band = bandFromRV(found.R_V_ratio);
-      msg += `<b>Case:</b> ${found.Country} (${found.Year})<br><b>R/V:</b> ${found.R_V_ratio.toFixed(3)} — ${band}<br><b>V_total:</b> ${found.V_total.toFixed(3)} <b>R (eff):</b> ${found.R.toFixed(3)} <b>Occurred:</b> ${found.rupture_occurred}`;
-      msg += `<br><b>Interpretation:</b> Repairs are ${(found.R_V_ratio*100).toFixed(0)}% of violations after capacity weighting; lower R/V implies greater imminent rupture risk.`;
-    }
-  } else if (series === 'Custom cases') {
-    msg += `<b>Custom:</b> ${pt.text || ''}<br>(computed from inputs)`;
-  } else if (series.includes('Pluralist')) {
-    msg += `<b>Interpretation:</b> Reciprocity and repair move the system into a stable basin (low debt).`;
-  } else if (series.includes('Authoritarian')) {
-    msg += `<b>Interpretation:</b> External enforcement without internalization leads to brittle plateaus and creeping debt.`;
-  } else if (series.includes('Collapsed')) {
-    msg += `<b>Interpretation:</b> Denial of obligations breaks field coherence; trajectories drop into rupture valleys.`;
+  const x = +pt.x, y=+pt.y, z=+pt.z;
+  let msg = `<b>Series:</b> ${series}<br><b>X (trust):</b> ${x.toFixed(3)} <b>Y (repair eff.):</b> ${y.toFixed(3)} <b>Z:</b> ${z.toFixed(3)}<br>`;
+  if (series.startsWith('Cases:') || document.getElementById('modeTraj').checked){
+    // Best-effort: show hovertext already includes decomposition
+    msg += pt.data.hovertext ? pt.data.hovertext[pt.pointIndex] : '(case)';
+  } else if (series === 'Custom cases'){
+    msg += `(custom case)`;
+  } else if (series.includes('Pluralist')){
+    msg += `Obligations reciprocated and repaired; climb toward stable basin.`;
+  } else if (series.includes('Authoritarian')){
+    msg += `Compliance without internalization; brittle plateau with creeping debt.`;
+  } else if (series.includes('Collapsed')){
+    msg += `Denial of obligations; descent into rupture valley.`;
+  } else if (series.includes('Residual')){
+    msg += `Residual = data − theory (after transforms). Red = worse than theory; blue = better.`;
   } else {
-    msg += `<b>Interpretation:</b> Terrain point: peaks ≈ stability; valleys ≈ rupture.`;
+    msg += `Terrain surface (theory/data). Peaks ≈ stability; valleys ≈ rupture.`;
   }
-  insight.innerHTML = msg;
+  document.getElementById('insight').innerHTML = msg;
 });
 
-/* Init */
+/* ===================== Custom cases ===================== */
+function buildCustomTrace(){
+  if (!customCases.length) return null;
+  return {
+    type:'scatter3d', mode:'markers+text', name:'Custom cases',
+    x: customCases.map(c=>c.X), y: customCases.map(c=>c.Y), z: customCases.map(c=>c.Z),
+    text: customCases.map(c=>c.name),
+    hovertext: customCases.map(c=> `${c.name}<br>R/V: ${c.rv} | R_eff: ${c.R_eff}<br>X=${c.X}, Y=${c.Y}, Z=${c.Z}`),
+    hoverinfo:'text', textposition:'top center',
+    marker:{ size:7, color:'#a78bfa', symbol:'diamond-open' }
+  };
+}
+
+document.getElementById('addCase').addEventListener('click', ()=>{
+  const name = (document.getElementById('caseName').value||'').trim() || `Custom ${customCases.length+1}`;
+  const V = Math.max(0, Math.min(2, parseFloat(document.getElementById('V').value)));
+  const Ravg = Math.max(0, Math.min(1, parseFloat(document.getElementById('Ravg').value)));
+  const Cap = Math.max(0, Math.min(1, parseFloat(document.getElementById('Cap').value)));
+  const Xov = document.getElementById('Xoverride').value;
+  const R_eff = +(Ravg*Cap).toFixed(4);
+  const rv = (V>0)? +(R_eff/V).toFixed(4) : null;
+  const X = Xov ? Math.max(0, Math.min(1, +Xov)) : Cap;
+  const Y = R_eff;
+  const Z = rv!=null ? +(1 - rv).toFixed(4) : null;
+  const idx = customCases.findIndex(c=> c.name.toLowerCase()===name.toLowerCase());
+  const entry = { name, X, Y, Z, rv, R_eff, V, Cap, Ravg };
+  if (idx>=0) customCases[idx]=entry; else customCases.push(entry);
+  document.getElementById('insight').innerHTML = `<b>Custom case:</b> ${name}<br>R_eff: ${R_eff} | R/V: ${rv} | Map: X=${X}, Y=${Y}, Z=${Z}`;
+  render();
+});
+document.getElementById('clearCases').addEventListener('click', ()=>{ customCases=[]; document.getElementById('insight').innerHTML='Custom cases cleared.'; render(); });
+
+/* ===================== Wire up controls & init ===================== */
+[
+  'modeStatic','modeTraj','toggleStylized','toggleFitted','toggleContours','toggleResiduals',
+  'togglePluralist','toggleAuthoritarian','toggleCollapsed','toggleCases',
+  'band1','band2','band3','band4','showLabels','normalizeXY','logitZ','sigma'
+].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('change', ()=>{ buildCaseList(); render(); });
+});
+
 buildCaseList();
 render();
 </script>
