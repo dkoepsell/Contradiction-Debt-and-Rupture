@@ -1,0 +1,54 @@
+{
+  "baseline": {
+    "V_components": {
+      "Security/Rights": 0.25,
+      "Rule of Law/Elections": 0.65,
+      "Center\u2013Local": 0.2,
+      "Narrative Legitimacy": 0.6,
+      "Services/Delivery": 0.15
+    },
+    "V_total": 1.85,
+    "R_components": {
+      "Acknowledgment": 0.3,
+      "Reform": 0.35,
+      "Compensation": 0.6,
+      "Inclusivity": 0.3,
+      "Implementation": 0.4
+    },
+    "R_mean": 0.39,
+    "C_triplet": {
+      "Legitimacy": 0.5,
+      "Elite Cohesion": 0.75,
+      "Institutional Competence": 0.65
+    },
+    "C_mean": 0.6333333333333333,
+    "R_eff": 0.247,
+    "R_over_V": 0.1335135135135135
+  },
+  "reform": {
+    "V_components": {
+      "Security/Rights": 0.25,
+      "Rule of Law/Elections": 0.4,
+      "Center\u2013Local": 0.2,
+      "Narrative Legitimacy": 0.39999999999999997,
+      "Services/Delivery": 0.15
+    },
+    "V_total": 1.4,
+    "R_components": {
+      "Acknowledgment": 0.44999999999999996,
+      "Reform": 0.5,
+      "Compensation": 0.6,
+      "Inclusivity": 0.44999999999999996,
+      "Implementation": 0.55
+    },
+    "R_mean": 0.51,
+    "C_triplet": {
+      "Legitimacy": 0.55,
+      "Elite Cohesion": 0.78,
+      "Institutional Competence": 0.77
+    },
+    "C_mean": 0.7000000000000001,
+    "R_eff": 0.35700000000000004,
+    "R_over_V": 0.25500000000000006
+  }
+}
